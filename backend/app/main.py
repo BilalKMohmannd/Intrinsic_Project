@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import traceback
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -14,8 +16,13 @@ app = FastAPI(title="Multi-Number SMS Manager", version="0.1.0")
 
 @app.on_event("startup")
 def _startup() -> None:
-    Base.metadata.create_all(bind=engine)
-    bootstrap_admin()
+    try:
+        Base.metadata.create_all(bind=engine)
+        bootstrap_admin()
+    except Exception:
+        print("Startup failed:")
+        print(traceback.format_exc())
+        raise
 
 
 app.include_router(auth.router)
