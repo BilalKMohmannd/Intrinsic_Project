@@ -5,7 +5,17 @@ import os
 import httpx
 import streamlit as st
 
-API_BASE_URL = (os.getenv("API_BASE_URL") or "http://127.0.0.1:8000").strip().rstrip("/")
+_secrets_api_base_url = None
+try:
+    _secrets_api_base_url = st.secrets.get("API_BASE_URL")
+except Exception:
+    _secrets_api_base_url = None
+
+API_BASE_URL = (
+    _secrets_api_base_url
+    or os.getenv("API_BASE_URL")
+    or "http://127.0.0.1:8000"
+).strip().rstrip("/")
 
 from lib.embedded_backend import ensure_backend_started
 

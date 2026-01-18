@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
@@ -43,8 +43,12 @@ def stats(u: User = Depends(get_current_user), db: Session = Depends(get_db)) ->
 
     unread_sms = q_messages.filter(Message.is_read.is_(False)).count()
 
-    today = datetime.utcnow().date().isoformat()
-    sms_today = q_messages.filter(Message.received_at.like(f"{today}%")).count()
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    tomorrow_start = today_start + timedelta(days=1)
+    sms_today = q_messages.filter(
+        Message.received_at >= today_start,
+        Message.received_at < tomorrow_start,
+    ).count()
 
     active_users = db.query(User).filter(User.is_active.is_(True)).count() if is_admin else 0
 
