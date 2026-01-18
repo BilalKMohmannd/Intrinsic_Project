@@ -21,7 +21,9 @@ def _env_int(name: str, default: int) -> int:
         return default
 
 
-DATABASE_URL = (os.getenv("DATABASE_URL") or "sqlite:///./data/app.db").strip()
+_raw_database_url = os.getenv("DATABASE_URL")
+_is_vercel = bool(os.getenv("VERCEL") or os.getenv("VERCEL_ENV"))
+DATABASE_URL = (_raw_database_url or ("sqlite:////tmp/app.db" if _is_vercel else "sqlite:///./data/app.db")).strip()
 if DATABASE_URL.startswith("sqlite:///"):
     sqlite_path = DATABASE_URL[len("sqlite:///") :]
     if sqlite_path.startswith("./"):
