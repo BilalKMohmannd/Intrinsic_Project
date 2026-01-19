@@ -58,6 +58,15 @@ class MarkReadRequest(BaseModel):
     is_read: bool
 
 
+class ForwardMessageRequest(BaseModel):
+    to_number: str
+
+
+class ForwardMessageResponse(BaseModel):
+    status: str
+    provider_message_sid: str | None = None
+
+
 class DashboardStats(BaseModel):
     active_phone_numbers: int
     unread_sms: int

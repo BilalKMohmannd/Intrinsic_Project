@@ -5,7 +5,7 @@ import re
 import pandas as pd
 import streamlit as st
 
-from lib.api_client import api_get, api_patch
+from lib.api_client import api_get, api_patch, api_post
 from lib.auth import require_login, sidebar
 
 try:
@@ -108,6 +108,20 @@ if selected_number:
                     st.warning("No active OTP code found.")
 
                 st.text_area("Full Message Body", value=msg.get("message_body") or "", height=150, disabled=True)
+
+                st.divider()
+                st.subheader("Forward")
+                with st.form(f"forward_{msg['id']}"):
+                    forward_to = st.text_input("Forward to", placeholder="+15551234567")
+                    forward_submitted = st.form_submit_button("Send", type="primary", use_container_width=True)
+
+                if forward_submitted:
+                    try:
+                        resp = api_post(f"/messages/{msg['id']}/forward", {"to_number": forward_to})
+                        sid = (resp or {}).get("provider_message_sid")
+                        st.success(f"Forwarded{(' (sid: ' + sid + ')') if sid else ''}.")
+                    except Exception as e:
+                        st.error(f"Forward failed: {e}")
 
                 c1, c2 = st.columns(2)
                 is_read = bool(msg.get("is_read"))
